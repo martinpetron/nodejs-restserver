@@ -1,38 +1,61 @@
 const { response, request } = require('express');
+const bcryptjs = require('bcryptjs');
+
+const User = require('../models/user.model');
 
 
+const usuariosGet = async(req = request, res = response) => {
 
+    const { limit = 5, begin = 0 } = req.query;
+    const query = { status: true }
 
-const usuariosGet = (req = request, res = response) => {
-
-    const { q, nombre = 'No name', apikey } = req.query;
+    const [ total, users ] = await Promise.all([
+        User.countDocuments( query ),
+        User.find( query )
+            .skip(Number( begin ))
+            .limit(Number( limit ))
+    ]);
 
     res.json({
-        msg:'get API - Controller',
-        q,
-        nombre,
-        apikey
+        total,
+        users
     });
   }
 
-const usuariosPost = (req, res = response) => {
+const usuariosPost = async(req, res = response) => { 
+    
+    const { name, email, password, role } = req.body; //  const body = req.body; //SIEMPRE DESESTRUCTURAR EL body por seguridad
 
-    const { nombre, edad } = req.body;
+    //Instanciar un usuario
+    const user = new User( { name, email, password, role } );
+
+    //Encriptar password 
+    const salt = bcryptjs.genSaltSync(10); //- hago un salt (antidad de vueltas que quiero que encrripte el pwd, a > mas seguro, pero mas lento.)
+    user.password = bcryptjs.hashSync( password, salt);//genero el hash, pasandole el pwd y el salt que arme
+
+    //Guardar en la base de datos
+    await user.save();
 
     res.status(201).json({
-        msg:'post API - Controller',
-        nombre,
-        edad
+        user
     });
 }
 
-  const usuariosPut = (req, res = response) => {
+  const usuariosPut = async(req, res = response) => {
 
     const { id } = req.params;
+    const { _id, status, password, google, email, ...others } = req.body;
+
+    if ( password ) {
+        //Encriptar password 
+        const salt = bcryptjs.genSaltSync(10);
+        others.password = bcryptjs.hashSync( password, salt);
+    }
+
+    const user = await User.findByIdAndUpdate( id, others );
 
     res.json({
-        msg:'put API - Controller',
-        id
+        user //TODO me trae lo viejo, previo al update y no lo updateado.. 
     });
 }
 
@@ -44,9 +67,17 @@ const usuariosPatch = (req, res = response) => {
 }
 
 
-const usuariosDelete = (req, res = response) => {
+const usuariosDelete = async(req, res = response) => {
+    const { id } = req.params;
+
+    // Borrado FISICO de la DB
+    // const user = await User.findByIdAndDelete ( id );
+
+    // "Borrado" del user, en realidad es un update al campo status
+    const user = await User.findByIdAndUpdate ( id, { status: false });
+
     res.json({
-        msg:'delete API - Controller'
+        user
     });
 }
 

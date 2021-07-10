@@ -1,4 +1,8 @@
 const { Router } = require('express');
+const { check } = require('express-validator');
+
+const { validateFields } = require('../middlewares/validate-fields');
+const { isRoleValid, isEmailValid, userExistsById } = require('../helpers/db-validators');
 
 const { usuariosGet, 
         usuariosPost,
@@ -10,13 +14,31 @@ const router = Router();
 
 router.get('/', usuariosGet );
 
-router.post('/', usuariosPost );
+router.post('/',[       //array de Middlewares
+        check('name','Name is required').not().isEmpty(),
+        check('password','Password is required').not().isEmpty(),
+        check('password','Password must have more than 6 characters').isLength({ min: 6 }),
+        check('email','Email is not in a valid format').isEmail(),
+        check('email').custom( isEmailValid ),
+        // check('role','Is not a valid role').isIn(['ADMIN_ROLE', 'USER_ROLE']),
+        check('role').custom( isRoleValid ), // se puede obviar esto --> check('role').custom( (role) => isValidRole(role) ),
+        validateFields  
+],usuariosPost );
 
-router.put('/:id', usuariosPut );
+router.put('/:id',[
+        check('id', 'Is not a Valid ID').isMongoId(),
+        check('id').custom( userExistsById ),
+        check('role').custom( isRoleValid ),
+        validateFields
+], usuariosPut );
 
 router.patch('/', usuariosPatch );
 
-router.delete('/', usuariosDelete );
+router.delete('/:id',[
+        check('id', 'Is not a Valid ID').isMongoId(),
+        check('id').custom( userExistsById ),
+        validateFields
+], usuariosDelete );
 
 
 
