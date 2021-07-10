@@ -69,15 +69,20 @@ const usuariosPatch = (req, res = response) => {
 
 const usuariosDelete = async(req, res = response) => {
     const { id } = req.params;
-
+    const uid = req.uid;
     // Borrado FISICO de la DB
     // const user = await User.findByIdAndDelete ( id );
 
     // "Borrado" del user, en realidad es un update al campo status
     const user = await User.findByIdAndUpdate ( id, { status: false });
+    
+    //Traigo la info del usuario autenticado en el middleware
+    // const userAuth = req.user;
+
 
     res.json({
         user
+        // ,userAuth
     });
 }
 

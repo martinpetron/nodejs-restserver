@@ -36,7 +36,9 @@ const UserSchema = Schema ({
 
 //Sobreescribo el metodo toJSON para que no retorne los campos "__v" ni "password"  
 UserSchema.methods.toJSON = function() {
-    const { __v, password, ...user } = this.toObject();
+    const { __v, password, _id, ...user } = this.toObject();
+    //Cambio el naming _id por uid
+    user.uid = _id;
     return user;
 };
 
