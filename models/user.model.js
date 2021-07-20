@@ -21,6 +21,7 @@ const UserSchema = Schema ({
     role: {
         type: String,
         required: true,
+        default: 'USER_ROLE',
         emun: ['ADMIN_ROLE', 'USER_ROLE'] //Valida que lo que se cargue este dentro de estas opciones
     },
     status: {
