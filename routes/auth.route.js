@@ -5,6 +5,7 @@ const { validateFields } = require('../middlewares/validate-fields');
 
 const router = Router();
 
+//Login
 router.post( '/login',[
     check('email','Email is required').not().isEmpty(),
     check('email','Email is not in a valid format').isEmail(),
@@ -12,6 +13,7 @@ router.post( '/login',[
     validateFields
 ], login );
 
+//Google SignIn
 router.post( '/google',[
     check('id_token','id_token is required').not().isEmpty(),
     validateFields

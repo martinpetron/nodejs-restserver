@@ -1,7 +1,7 @@
 const { response, request } = require('express');
 const bcryptjs = require('bcryptjs');
 
-const User = require('../models/user.model');
+const { User } = require('../models');
 
 
 const usuariosGet = async(req = request, res = response) => {
@@ -52,7 +52,7 @@ const usuariosPost = async(req, res = response) => {
         others.password = bcryptjs.hashSync( password, salt);
     }
 
-    const user = await User.findByIdAndUpdate( id, others );
+    const user = await User.findByIdAndUpdate( id, others, {new: true} );
 
     res.json({
         user //TODO me trae lo viejo, previo al update y no lo updateado.. 
@@ -74,7 +74,7 @@ const usuariosDelete = async(req, res = response) => {
     // const user = await User.findByIdAndDelete ( id );
 
     // "Borrado" del user, en realidad es un update al campo status
-    const user = await User.findByIdAndUpdate ( id, { status: false });
+    const user = await User.findByIdAndUpdate ( id, { status: false }, { new: true });
     
     //Traigo la info del usuario autenticado en el middleware
     // const userAuth = req.user;
