@@ -27,7 +27,8 @@ const ProductSchema = Schema ({
         required: true
     },
     description : { type: String },
-    available : { type: Boolean, default: true }
+    available : { type: Boolean, default: true },
+    img : { type: String }
 });
 
 //Sobreescribo el metodo toJSON para que no retorne los campos "__v" ni "status"  
