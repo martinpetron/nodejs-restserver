@@ -193,9 +193,54 @@ const showImg = async(req = request, res = response) => {
 
 }
 
+const showImgCloudinary = async(req = request, res = response) => {
+
+
+  const { id, collection } = req.params;
+
+  let model; // uso let porque voy a establecer su valor de manera condicional
+
+  switch ( collection ) {
+    case "users":
+      model = await User.findById( id );
+      if ( !model ) {
+        return res.status(500).json({ 
+          msg: `User with ID ${ id } not found.`
+        });
+      }
+
+    break;
+    case "products":
+      model = await Product.findById( id );
+      if ( !model ) {
+        return res.status(500).json({ 
+          msg: `Product with ID ${ id } not found.`
+        });
+      }
+
+    break;    
+  
+    default:
+      return res.status(500).json({ msg: 'I forgot to validate this. '});
+  }
+
+  if ( model.img ) {
+      return res.json({img: model.img });
+  }  
+
+  //Colocar NO-IMAGE por defecto.
+  // res.json({ msg: 'Placeholder is missing. '}); 
+  const noImgPath = path.join( __dirname, '../assets/no-image.jpg');
+  if ( fs.existsSync( noImgPath ) ) {
+    return res.sendFile( noImgPath )
+  }
+
+}
+
 module.exports = {
     uploadFile,
     updateImg,
     updateImgCloudinary,
-    showImg
+    showImg,
+    showImgCloudinary
 }
